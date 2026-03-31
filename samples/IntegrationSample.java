@@ -21,6 +21,9 @@ public final class IntegrationSample {
         String customPlaceId = null;
 
         try {
+            Models.BillingPlansResponse plans = client.listBillingPlans();
+            System.out.println("billing plans=" + plans.plans().stream().map(Models.PlanCatalogEntry::code).toList());
+
             Models.GroupSingleResponse createdGroup = client.createGroup(new Models.GroupCreateRequest(groupName));
             groupId = createdGroup.row().groupId();
             System.out.println("created group=" + createdGroup.row());
@@ -67,6 +70,19 @@ public final class IntegrationSample {
 
             Models.CustomPlacesListResponse listedPlaces = client.listCustomPlaces(listRequest);
             System.out.println("group custom places=" + listedPlaces.rows().stream().map(Models.CustomPlace::name).toList());
+
+            Models.SearchResponse search = client.searchPlaces(new Models.SearchPlacesRequest("coffee near Boston MA").limit(3));
+            String firstPlaceId = search.rows().stream()
+                    .filter(Models.SearchRowGlobal.class::isInstance)
+                    .map(Models.SearchRowGlobal.class::cast)
+                    .map(Models.SearchRowGlobal::fsqPlaceId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (firstPlaceId != null) {
+                Models.PlaceSingleResponse place = client.getPlace(firstPlaceId);
+                System.out.println("direct place lookup=" + place.row());
+            }
         } finally {
             if (customPlaceId != null) {
                 try {

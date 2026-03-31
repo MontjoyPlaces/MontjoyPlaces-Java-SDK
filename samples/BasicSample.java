@@ -12,6 +12,9 @@ public final class BasicSample {
 
         MontjoyPlaces client = new MontjoyPlaces(apiKey);
 
+        Models.BillingPlansResponse plans = client.listBillingPlans();
+        System.out.println("billing plans=" + plans.plans().stream().map(Models.PlanCatalogEntry::code).toList());
+
         Models.WhoAmIResponse whoAmI = client.whoAmI();
         System.out.println("whoami tenant=" + whoAmI.tenantId() + " key=" + whoAmI.keyName());
 
@@ -21,5 +24,17 @@ public final class BasicSample {
         Models.SearchResponse search = client.searchPlaces(new Models.SearchPlacesRequest("coffee near Boston MA").limit(3));
         System.out.println("search count=" + search.count());
         System.out.println(search.rows());
+
+        String firstPlaceId = search.rows().stream()
+                .filter(Models.SearchRowGlobal.class::isInstance)
+                .map(Models.SearchRowGlobal.class::cast)
+                .map(Models.SearchRowGlobal::fsqPlaceId)
+                .findFirst()
+                .orElse(null);
+
+        if (firstPlaceId != null) {
+            Models.PlaceSingleResponse place = client.getPlace(firstPlaceId);
+            System.out.println("direct place lookup=" + place.row());
+        }
     }
 }

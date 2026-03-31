@@ -16,6 +16,11 @@ final class Mappers {
                 string(map, "appId"), string(map, "keyName"), string(map, "prefix"));
     }
 
+    static Models.BillingPlansResponse billingPlans(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.BillingPlansResponse(bool(map, "ok"), list(map, "plans").stream().map(Mappers::planCatalogEntry).toList());
+    }
+
     static Models.GroupsListResponse groupsList(Object value) {
         Map<String, Object> map = asMap(value);
         return new Models.GroupsListResponse(bool(map, "ok"), list(map, "rows").stream().map(Mappers::group).toList());
@@ -47,6 +52,11 @@ final class Mappers {
     static Models.CustomPlaceSingleResponse customPlaceSingle(Object value) {
         Map<String, Object> map = asMap(value);
         return new Models.CustomPlaceSingleResponse(bool(map, "ok"), customPlace(map.get("row")));
+    }
+
+    static Models.PlaceSingleResponse placeSingleResponse(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.PlaceSingleResponse(bool(map, "ok"), map.get("row") == null ? null : place(map.get("row")));
     }
 
     static Models.OverrideResponse overrideResponse(Object value) {
@@ -200,6 +210,7 @@ final class Mappers {
             putQuery(query, "forceTypeahead", searchPlacesRequest.getForceTypeahead());
             putQuery(query, "customOnly", searchPlacesRequest.getCustomOnly());
             putQuery(query, "onlyCustom", searchPlacesRequest.getOnlyCustom());
+            putQuery(query, "isAddress", searchPlacesRequest.getIsAddress());
             putQuery(query, "groupId", searchPlacesRequest.getGroupId());
         } else {
             throw new IllegalArgumentException("Unsupported query request: " + request.getClass().getName());
@@ -207,9 +218,48 @@ final class Mappers {
         return query;
     }
 
+    private static Models.PlanCatalogEntry planCatalogEntry(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.PlanCatalogEntry(
+                string(map, "code"),
+                string(map, "label"),
+                nullableInteger(map.get("monthlyRequests")),
+                nullableInteger(map.get("maxTenants")),
+                nullableInteger(map.get("maxApps")),
+                nullableInteger(map.get("maxApiKeys")),
+                bool(map, "overageAllowed"),
+                integer(map, "overageBlockRequests"),
+                integer(map, "overageBlockPriceCents"),
+                nullableInteger(map.get("maxUsageMultiplier")),
+                bool(map, "hardCapByDefault"));
+    }
+
     private static Models.Group group(Object value) {
         Map<String, Object> map = asMap(value);
         return new Models.Group(string(map, "group_id"), string(map, "tenant_id"), string(map, "name"), dateTime(map, "created_at"));
+    }
+
+    private static Models.Place place(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.Place(
+                string(map, "fsq_place_id"),
+                string(map, "place_source"),
+                string(map, "name"),
+                number(map, "latitude"),
+                number(map, "longitude"),
+                nullableString(map.get("address")),
+                nullableString(map.get("locality")),
+                nullableString(map.get("region")),
+                nullableString(map.get("postcode")),
+                nullableString(map.get("country")),
+                nullableString(map.get("website")),
+                nullableString(map.get("tel")),
+                nullableString(map.get("email")),
+                nullableString(map.get("formatted_address")),
+                nullableString(map.get("geocode_provider")),
+                nullableDouble(map.get("geocode_confidence")),
+                nullableDateTime(map.get("created_at")),
+                nullableDateTime(map.get("updated_at")));
     }
 
     private static Models.CustomPlace customPlace(Object value) {
@@ -253,6 +303,14 @@ final class Mappers {
                 nullableString(map.get("groupId")),
                 nullableBoolean(map.get("customOnly")),
                 nullableString(map.get("localityText")),
+                nullableString(map.get("addressQuery")),
+                nullableString(map.get("addressPlaceId")),
+                nullableString(map.get("formattedAddress")),
+                nullableString(map.get("geocodeProvider")),
+                nullableBoolean(map.get("geocodeCacheHit")),
+                nullableDouble(map.get("addressRadiusMeters")),
+                nullableInteger(map.get("addressCandidateCount")),
+                nullableInteger(map.get("addressFilteredCount")),
                 searchResolvedCenter(map.get("center")));
     }
 
@@ -340,6 +398,10 @@ final class Mappers {
 
     private static OffsetDateTime dateTime(Map<String, Object> map, String key) {
         return OffsetDateTime.parse(String.valueOf(map.get(key)));
+    }
+
+    private static OffsetDateTime nullableDateTime(Object value) {
+        return value == null ? null : OffsetDateTime.parse(String.valueOf(value));
     }
 
     private static void put(Map<String, Object> body, String key, Object value) {

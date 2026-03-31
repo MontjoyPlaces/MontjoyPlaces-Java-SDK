@@ -9,7 +9,44 @@ public final class Models {
 
     public record ErrorResponse(String error) {}
 
+    public record PlanCatalogEntry(
+            String code,
+            String label,
+            Integer monthlyRequests,
+            Integer maxTenants,
+            Integer maxApps,
+            Integer maxApiKeys,
+            boolean overageAllowed,
+            int overageBlockRequests,
+            int overageBlockPriceCents,
+            Integer maxUsageMultiplier,
+            boolean hardCapByDefault) {}
+
+    public record BillingPlansResponse(boolean ok, List<PlanCatalogEntry> plans) {}
+
     public record WhoAmIResponse(boolean ok, String apiKeyId, String tenantId, String appId, String keyName, String prefix) {}
+
+    public record Place(
+            String fsqPlaceId,
+            String placeSource,
+            String name,
+            double latitude,
+            double longitude,
+            String address,
+            String locality,
+            String region,
+            String postcode,
+            String country,
+            String website,
+            String tel,
+            String email,
+            String formattedAddress,
+            String geocodeProvider,
+            Double geocodeConfidence,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt) {}
+
+    public record PlaceSingleResponse(boolean ok, Place row) {}
 
     public record Group(String groupId, String tenantId, String name, OffsetDateTime createdAt) {}
 
@@ -75,6 +112,14 @@ public final class Models {
             String groupId,
             Boolean customOnly,
             String localityText,
+            String addressQuery,
+            String addressPlaceId,
+            String formattedAddress,
+            String geocodeProvider,
+            Boolean geocodeCacheHit,
+            Double addressRadiusMeters,
+            Integer addressCandidateCount,
+            Integer addressFilteredCount,
             SearchResolvedCenter center) {}
 
     public record SearchResponse(boolean ok, String mode, String q, SearchResolved resolved, int count, List<SearchRow> rows) {}
@@ -382,6 +427,7 @@ public final class Models {
         private Boolean forceTypeahead;
         private Boolean customOnly;
         private Boolean onlyCustom;
+        private Boolean isAddress;
         private String groupId;
 
         public SearchPlacesRequest(String q) {
@@ -397,6 +443,7 @@ public final class Models {
         public Boolean getForceTypeahead() { return forceTypeahead; }
         public Boolean getCustomOnly() { return customOnly; }
         public Boolean getOnlyCustom() { return onlyCustom; }
+        public Boolean getIsAddress() { return isAddress; }
         public String getGroupId() { return groupId; }
 
         public SearchPlacesRequest lat(Double value) { this.lat = value; return this; }
@@ -407,6 +454,7 @@ public final class Models {
         public SearchPlacesRequest forceTypeahead(Boolean value) { this.forceTypeahead = value; return this; }
         public SearchPlacesRequest customOnly(Boolean value) { this.customOnly = value; return this; }
         public SearchPlacesRequest onlyCustom(Boolean value) { this.onlyCustom = value; return this; }
+        public SearchPlacesRequest isAddress(Boolean value) { this.isAddress = value; return this; }
         public SearchPlacesRequest groupId(String value) { this.groupId = value; return this; }
     }
 }

@@ -32,6 +32,10 @@ public final class MontjoyPlaces {
         this.httpClient = httpClient;
     }
 
+    public Models.BillingPlansResponse listBillingPlans() {
+        return Mappers.billingPlans(send("GET", "/billing/plans", null, null));
+    }
+
     public Models.WhoAmIResponse whoAmI() {
         return Mappers.whoAmI(send("GET", "/v1/whoami", null, null));
     }
@@ -74,6 +78,10 @@ public final class MontjoyPlaces {
 
     public Models.CustomPlaceSingleResponse hideCustomPlace(String customPlaceId, Models.CustomPlaceHideRequest request) {
         return Mappers.customPlaceSingle(send("POST", "/v1/custom-places/" + encode(customPlaceId) + "/hide", null, request));
+    }
+
+    public Models.PlaceSingleResponse getPlace(String placeId) {
+        return Mappers.placeSingleResponse(send("GET", "/v1/places/" + encode(placeId), null, null));
     }
 
     public Models.OverrideResponse overridePlace(String fsqPlaceId, Models.OverrideRequest request) {
