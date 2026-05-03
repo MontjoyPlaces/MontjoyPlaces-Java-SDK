@@ -18,14 +18,14 @@ Use the following dependency coordinates when consuming the SDK from a Maven-com
 <dependency>
   <groupId>com.montjoyplaces</groupId>
   <artifactId>MontjoyPlaces</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```gradle
-implementation("com.montjoyplaces:MontjoyPlaces:1.0.0")
+implementation("com.montjoyplaces:MontjoyPlaces:1.0.3")
 ```
 
 ## Building From Source
@@ -325,7 +325,7 @@ The integration sample exercises a larger CRUD flow:
 
 - The project is configured for Java 17 via `maven.compiler.release`.
 - The package namespace is `com.montjoy.places`.
-- The current version in `pom.xml` is `1.0.0`.
+- The current version in `pom.xml` is `1.0.3`.
 
 ## License
 
