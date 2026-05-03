@@ -24,7 +24,7 @@ public final class Models {
 
     public record BillingPlansResponse(boolean ok, List<PlanCatalogEntry> plans) {}
 
-    public record WhoAmIResponse(boolean ok, String apiKeyId, String tenantId, String appId, String keyName, String prefix) {}
+    public record WhoAmIResponse(boolean ok, String apiKeyId, String tenantId, String appId, String keyName, String prefix, boolean readOnly) {}
 
     public record Place(
             String fsqPlaceId,
@@ -85,7 +85,37 @@ public final class Models {
 
     public record CustomPlacesListResponse(boolean ok, List<CustomPlace> rows, String nextCursor) {}
 
+    public record CustomPlacesExportResponse(boolean ok, int count, List<CustomPlace> rows, String nextCursor) {}
+
     public record CustomPlaceSingleResponse(boolean ok, CustomPlace row) {}
+
+    public record ImportedCustomPlace(
+            String customPlaceId,
+            String tenantId,
+            String appId,
+            String groupId,
+            String ownerUserId,
+            String source,
+            String fsqPlaceId,
+            String name,
+            double latitude,
+            double longitude,
+            String address,
+            String locality,
+            String region,
+            String postcode,
+            String country,
+            String website,
+            String tel,
+            String email,
+            Object tags,
+            Object meta,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt,
+            Double distMeters,
+            String importAction) {}
+
+    public record CustomPlacesImportResponse(boolean ok, int imported, int created, int updated, List<ImportedCustomPlace> rows) {}
 
     public sealed interface SearchRow permits SearchRowGlobal, SearchRowCustom {
         String source();
@@ -240,6 +270,97 @@ public final class Models {
         public CustomPlaceCreateRequest meta(Object value) { this.meta = value; return this; }
     }
 
+    public static final class CustomPlaceImportRow {
+        private String customPlaceId;
+        private String customPlaceIdSnakeCase;
+        private String groupId;
+        private String groupIdSnakeCase;
+        private String source;
+        private String ownerUserId;
+        private String ownerUserIdSnakeCase;
+        private String fsqPlaceId;
+        private String fsqPlaceIdSnakeCase;
+        private final String name;
+        private final double latitude;
+        private final double longitude;
+        private String address;
+        private String locality;
+        private String region;
+        private String postcode;
+        private String country;
+        private String website;
+        private String tel;
+        private String email;
+        private Object tags;
+        private Object meta;
+
+        public CustomPlaceImportRow(String name, double latitude, double longitude) {
+            this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public String getCustomPlaceId() { return customPlaceId; }
+        public String getCustomPlaceIdSnakeCase() { return customPlaceIdSnakeCase; }
+        public String getGroupId() { return groupId; }
+        public String getGroupIdSnakeCase() { return groupIdSnakeCase; }
+        public String getSource() { return source; }
+        public String getOwnerUserId() { return ownerUserId; }
+        public String getOwnerUserIdSnakeCase() { return ownerUserIdSnakeCase; }
+        public String getFsqPlaceId() { return fsqPlaceId; }
+        public String getFsqPlaceIdSnakeCase() { return fsqPlaceIdSnakeCase; }
+        public String getName() { return name; }
+        public double getLatitude() { return latitude; }
+        public double getLongitude() { return longitude; }
+        public String getAddress() { return address; }
+        public String getLocality() { return locality; }
+        public String getRegion() { return region; }
+        public String getPostcode() { return postcode; }
+        public String getCountry() { return country; }
+        public String getWebsite() { return website; }
+        public String getTel() { return tel; }
+        public String getEmail() { return email; }
+        public Object getTags() { return tags; }
+        public Object getMeta() { return meta; }
+
+        public CustomPlaceImportRow customPlaceId(String value) { this.customPlaceId = value; return this; }
+        public CustomPlaceImportRow customPlaceIdSnakeCase(String value) { this.customPlaceIdSnakeCase = value; return this; }
+        public CustomPlaceImportRow groupId(String value) { this.groupId = value; return this; }
+        public CustomPlaceImportRow groupIdSnakeCase(String value) { this.groupIdSnakeCase = value; return this; }
+        public CustomPlaceImportRow source(String value) { this.source = value; return this; }
+        public CustomPlaceImportRow ownerUserId(String value) { this.ownerUserId = value; return this; }
+        public CustomPlaceImportRow ownerUserIdSnakeCase(String value) { this.ownerUserIdSnakeCase = value; return this; }
+        public CustomPlaceImportRow fsqPlaceId(String value) { this.fsqPlaceId = value; return this; }
+        public CustomPlaceImportRow fsqPlaceIdSnakeCase(String value) { this.fsqPlaceIdSnakeCase = value; return this; }
+        public CustomPlaceImportRow address(String value) { this.address = value; return this; }
+        public CustomPlaceImportRow locality(String value) { this.locality = value; return this; }
+        public CustomPlaceImportRow region(String value) { this.region = value; return this; }
+        public CustomPlaceImportRow postcode(String value) { this.postcode = value; return this; }
+        public CustomPlaceImportRow country(String value) { this.country = value; return this; }
+        public CustomPlaceImportRow website(String value) { this.website = value; return this; }
+        public CustomPlaceImportRow tel(String value) { this.tel = value; return this; }
+        public CustomPlaceImportRow email(String value) { this.email = value; return this; }
+        public CustomPlaceImportRow tags(Object value) { this.tags = value; return this; }
+        public CustomPlaceImportRow meta(Object value) { this.meta = value; return this; }
+    }
+
+    public static final class CustomPlacesImportRequest {
+        private String mode;
+        private String groupId;
+        private List<CustomPlaceImportRow> rows;
+        private List<CustomPlaceImportRow> places;
+
+        public String getMode() { return mode; }
+        public String getGroupId() { return groupId; }
+        public List<CustomPlaceImportRow> getRows() { return rows; }
+        public List<CustomPlaceImportRow> getPlaces() { return places; }
+
+        public CustomPlacesImportRequest mode(String value) { this.mode = value; return this; }
+        public CustomPlacesImportRequest groupId(String value) { this.groupId = value; return this; }
+        public CustomPlacesImportRequest rows(List<CustomPlaceImportRow> value) { this.rows = value; return this; }
+        public CustomPlacesImportRequest places(List<CustomPlaceImportRow> value) { this.places = value; return this; }
+    }
+
     public static final class CustomPlaceUpdateRequest {
         private String name;
         private Double latitude;
@@ -311,6 +432,23 @@ public final class Models {
         public ListCustomPlacesRequest limit(Integer value) { this.limit = value; return this; }
         public ListCustomPlacesRequest cursor(String value) { this.cursor = value; return this; }
         public ListCustomPlacesRequest includeHidden(Boolean value) { this.includeHidden = value; return this; }
+    }
+
+    public static final class ExportCustomPlacesRequest {
+        private String groupId;
+        private Integer limit;
+        private String cursor;
+        private Boolean includeHidden;
+
+        public String getGroupId() { return groupId; }
+        public Integer getLimit() { return limit; }
+        public String getCursor() { return cursor; }
+        public Boolean getIncludeHidden() { return includeHidden; }
+
+        public ExportCustomPlacesRequest groupId(String value) { this.groupId = value; return this; }
+        public ExportCustomPlacesRequest limit(Integer value) { this.limit = value; return this; }
+        public ExportCustomPlacesRequest cursor(String value) { this.cursor = value; return this; }
+        public ExportCustomPlacesRequest includeHidden(Boolean value) { this.includeHidden = value; return this; }
     }
 
     public static final class OverrideRequest {

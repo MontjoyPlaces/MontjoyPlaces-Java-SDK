@@ -13,7 +13,7 @@ final class Mappers {
     static Models.WhoAmIResponse whoAmI(Object value) {
         Map<String, Object> map = asMap(value);
         return new Models.WhoAmIResponse(bool(map, "ok"), string(map, "apiKeyId"), string(map, "tenantId"),
-                string(map, "appId"), string(map, "keyName"), string(map, "prefix"));
+                string(map, "appId"), string(map, "keyName"), string(map, "prefix"), bool(map, "readOnly"));
     }
 
     static Models.BillingPlansResponse billingPlans(Object value) {
@@ -47,6 +47,25 @@ final class Mappers {
                 bool(map, "ok"),
                 list(map, "rows").stream().map(Mappers::customPlace).toList(),
                 nullableString(map.get("nextCursor")));
+    }
+
+    static Models.CustomPlacesExportResponse customPlacesExport(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.CustomPlacesExportResponse(
+                bool(map, "ok"),
+                integer(map, "count"),
+                list(map, "rows").stream().map(Mappers::customPlace).toList(),
+                nullableString(map.get("nextCursor")));
+    }
+
+    static Models.CustomPlacesImportResponse customPlacesImport(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.CustomPlacesImportResponse(
+                bool(map, "ok"),
+                integer(map, "imported"),
+                integer(map, "created"),
+                integer(map, "updated"),
+                list(map, "rows").stream().map(Mappers::importedCustomPlace).toList());
     }
 
     static Models.CustomPlaceSingleResponse customPlaceSingle(Object value) {
@@ -149,6 +168,15 @@ final class Mappers {
             put(body, "meta", customPlaceUpdateRequest.getMeta());
         } else if (request instanceof Models.CustomPlaceHideRequest hideRequest) {
             body.put("hidden", hideRequest.isHidden());
+        } else if (request instanceof Models.CustomPlacesImportRequest importRequest) {
+            put(body, "mode", importRequest.getMode());
+            put(body, "groupId", importRequest.getGroupId());
+            if (importRequest.getRows() != null) {
+                body.put("rows", importRequest.getRows().stream().map(Mappers::importRowBody).toList());
+            }
+            if (importRequest.getPlaces() != null) {
+                body.put("places", importRequest.getPlaces().stream().map(Mappers::importRowBody).toList());
+            }
         } else if (request instanceof Models.OverrideRequest overrideRequest) {
             put(body, "groupId", overrideRequest.getGroupId());
             put(body, "hide", overrideRequest.getHide());
@@ -184,6 +212,13 @@ final class Mappers {
             putQuery(query, "cursor", listCustomPlacesRequest.getCursor());
             if (listCustomPlacesRequest.getIncludeHidden() != null) {
                 query.put("includeHidden", listCustomPlacesRequest.getIncludeHidden() ? "1" : "0");
+            }
+        } else if (request instanceof Models.ExportCustomPlacesRequest exportCustomPlacesRequest) {
+            putQuery(query, "groupId", exportCustomPlacesRequest.getGroupId());
+            putQuery(query, "limit", exportCustomPlacesRequest.getLimit());
+            putQuery(query, "cursor", exportCustomPlacesRequest.getCursor());
+            if (exportCustomPlacesRequest.getIncludeHidden() != null) {
+                query.put("includeHidden", exportCustomPlacesRequest.getIncludeHidden() ? "1" : "0");
             }
         } else if (request instanceof Models.NearestUsCitiesRequest nearestUsCitiesRequest) {
             putQuery(query, "lat", nearestUsCitiesRequest.getLat());
@@ -288,6 +323,35 @@ final class Mappers {
                 dateTime(map, "created_at"),
                 dateTime(map, "updated_at"),
                 nullableDouble(map.get("dist_m")));
+    }
+
+    private static Models.ImportedCustomPlace importedCustomPlace(Object value) {
+        Map<String, Object> map = asMap(value);
+        return new Models.ImportedCustomPlace(
+                string(map, "custom_place_id"),
+                string(map, "tenant_id"),
+                nullableString(map.get("app_id")),
+                nullableString(map.get("group_id")),
+                nullableString(map.get("owner_user_id")),
+                string(map, "source"),
+                nullableString(map.get("fsq_place_id")),
+                string(map, "name"),
+                number(map, "latitude"),
+                number(map, "longitude"),
+                nullableString(map.get("address")),
+                nullableString(map.get("locality")),
+                nullableString(map.get("region")),
+                nullableString(map.get("postcode")),
+                nullableString(map.get("country")),
+                nullableString(map.get("website")),
+                nullableString(map.get("tel")),
+                nullableString(map.get("email")),
+                map.get("tags"),
+                map.get("meta"),
+                dateTime(map, "created_at"),
+                dateTime(map, "updated_at"),
+                nullableDouble(map.get("dist_m")),
+                nullableString(map.get("_import_action")));
     }
 
     private static Models.SearchResolved searchResolved(Object value) {
@@ -408,6 +472,33 @@ final class Mappers {
         if (value != null) {
             body.put(key, value);
         }
+    }
+
+    private static Map<String, Object> importRowBody(Models.CustomPlaceImportRow row) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        put(body, "customPlaceId", row.getCustomPlaceId());
+        put(body, "custom_place_id", row.getCustomPlaceIdSnakeCase());
+        put(body, "groupId", row.getGroupId());
+        put(body, "group_id", row.getGroupIdSnakeCase());
+        put(body, "source", row.getSource());
+        put(body, "ownerUserId", row.getOwnerUserId());
+        put(body, "owner_user_id", row.getOwnerUserIdSnakeCase());
+        put(body, "fsqPlaceId", row.getFsqPlaceId());
+        put(body, "fsq_place_id", row.getFsqPlaceIdSnakeCase());
+        body.put("name", row.getName());
+        body.put("latitude", row.getLatitude());
+        body.put("longitude", row.getLongitude());
+        put(body, "address", row.getAddress());
+        put(body, "locality", row.getLocality());
+        put(body, "region", row.getRegion());
+        put(body, "postcode", row.getPostcode());
+        put(body, "country", row.getCountry());
+        put(body, "website", row.getWebsite());
+        put(body, "tel", row.getTel());
+        put(body, "email", row.getEmail());
+        put(body, "tags", row.getTags());
+        put(body, "meta", row.getMeta());
+        return body;
     }
 
     private static void putQuery(Map<String, String> query, String key, Object value) {

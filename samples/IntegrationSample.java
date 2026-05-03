@@ -71,6 +71,38 @@ public final class IntegrationSample {
             Models.CustomPlacesListResponse listedPlaces = client.listCustomPlaces(listRequest);
             System.out.println("group custom places=" + listedPlaces.rows().stream().map(Models.CustomPlace::name).toList());
 
+            Models.CustomPlacesExportResponse exportedPlaces = client.exportCustomPlaces(
+                    new Models.ExportCustomPlacesRequest()
+                            .groupId(groupId)
+                            .limit(10)
+                            .includeHidden(true)
+            );
+            System.out.println("exported custom places=" + exportedPlaces.count());
+
+            Models.CustomPlacesImportResponse importedPlaces = client.importCustomPlaces(
+                    new Models.CustomPlacesImportRequest()
+                            .mode("upsert")
+                            .rows(exportedPlaces.rows().stream()
+                                    .map(row -> new Models.CustomPlaceImportRow(row.name(), row.latitude(), row.longitude())
+                                            .customPlaceIdSnakeCase(row.customPlaceId())
+                                            .groupIdSnakeCase(row.groupId())
+                                            .fsqPlaceIdSnakeCase(row.fsqPlaceId())
+                                            .ownerUserIdSnakeCase(row.ownerUserId())
+                                            .source(row.source())
+                                            .address(row.address())
+                                            .locality(row.locality())
+                                            .region(row.region())
+                                            .postcode(row.postcode())
+                                            .country(row.country())
+                                            .website(row.website())
+                                            .tel(row.tel())
+                                            .email(row.email())
+                                            .tags(row.tags())
+                                            .meta(row.meta()))
+                                    .toList())
+            );
+            System.out.println("imported custom places=" + importedPlaces.imported());
+
             Models.SearchResponse search = client.searchPlaces(new Models.SearchPlacesRequest("coffee near Boston MA").limit(3));
             String firstPlaceId = search.rows().stream()
                     .filter(Models.SearchRowGlobal.class::isInstance)

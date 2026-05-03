@@ -66,7 +66,7 @@ public class Example {
         MontjoyPlaces client = new MontjoyPlaces(apiKey);
 
         Models.WhoAmIResponse whoAmI = client.whoAmI();
-        System.out.println("tenant=" + whoAmI.tenantId());
+        System.out.println("tenant=" + whoAmI.tenantId() + " readOnly=" + whoAmI.readOnly());
 
         Models.SearchResponse search = client.searchPlaces(
                 new Models.SearchPlacesRequest("coffee near Boston MA").limit(3)
@@ -160,6 +160,26 @@ Models.CustomPlaceCreateRequest request = new Models.CustomPlaceCreateRequest(
 Models.CustomPlaceSingleResponse created = client.createCustomPlace(request);
 ```
 
+### Export and Import Custom Places
+
+```java
+Models.CustomPlacesExportResponse exported = client.exportCustomPlaces(
+        new Models.ExportCustomPlacesRequest()
+                .groupId("group_123")
+                .includeHidden(true)
+);
+
+Models.CustomPlacesImportResponse imported = client.importCustomPlaces(
+        new Models.CustomPlacesImportRequest()
+                .mode("upsert")
+                .rows(exported.rows().stream()
+                        .map(row -> new Models.CustomPlaceImportRow(row.name(), row.latitude(), row.longitude())
+                                .customPlaceIdSnakeCase(row.customPlaceId())
+                                .groupIdSnakeCase(row.groupId()))
+                        .toList())
+);
+```
+
 ### Update a Custom Place
 
 ```java
@@ -231,7 +251,7 @@ The SDK currently includes methods for:
 
 - API identity: `whoAmI`
 - Groups: `listGroups`, `createGroup`, `updateGroup`, `deleteGroup`
-- Custom places: `listCustomPlaces`, `createCustomPlace`, `getCustomPlace`, `updateCustomPlace`, `deleteCustomPlace`, `hideCustomPlace`
+- Custom places: `listCustomPlaces`, `exportCustomPlaces`, `importCustomPlaces`, `createCustomPlace`, `getCustomPlace`, `updateCustomPlace`, `deleteCustomPlace`, `hideCustomPlace`
 - Place overrides: `overridePlace`
 - US city lookup: `lookupNearestUsCities`, `searchUsCities`, `lookupUsZipcode`
 - Category lookup: `searchCategories`, `getCategory`, `getCategoryChildren`
@@ -290,6 +310,7 @@ The integration sample exercises a larger CRUD flow:
 - fetch and update it
 - hide and unhide it
 - list custom places
+- export and import custom places
 - clean up created records
 
 ## Project Structure

@@ -60,6 +60,14 @@ public final class MontjoyPlaces {
         return Mappers.customPlacesList(send("GET", "/v1/custom-places", request, null));
     }
 
+    public Models.CustomPlacesExportResponse exportCustomPlaces(Models.ExportCustomPlacesRequest request) {
+        return Mappers.customPlacesExport(send("GET", "/v1/custom-places/export", request, null));
+    }
+
+    public Models.CustomPlacesImportResponse importCustomPlaces(Models.CustomPlacesImportRequest request) {
+        return Mappers.customPlacesImport(send("POST", "/v1/custom-places/import", null, request));
+    }
+
     public Models.CustomPlaceSingleResponse createCustomPlace(Models.CustomPlaceCreateRequest request) {
         return Mappers.customPlaceSingle(send("POST", "/v1/custom-places", null, request));
     }

@@ -16,7 +16,7 @@ public final class BasicSample {
         System.out.println("billing plans=" + plans.plans().stream().map(Models.PlanCatalogEntry::code).toList());
 
         Models.WhoAmIResponse whoAmI = client.whoAmI();
-        System.out.println("whoami tenant=" + whoAmI.tenantId() + " key=" + whoAmI.keyName());
+        System.out.println("whoami tenant=" + whoAmI.tenantId() + " key=" + whoAmI.keyName() + " readOnly=" + whoAmI.readOnly());
 
         Models.GroupsListResponse groups = client.listGroups(new Models.ListGroupsRequest().limit(5));
         System.out.println("groups=" + groups.rows().stream().map(Models.Group::name).toList());
